@@ -2,13 +2,13 @@ import { useState } from 'react';
 
 // use npm install @hello-pangea/dnd to install lib before using this 
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { initialBoardData } from '../../frontend_testing/mockdata';
+import { initialBoardData } from '../../../frontend_testing/mockdata';
 
 export default function TaskBoard() {
   const [data, setData] = useState(initialBoardData);
   const onDragEnd = (result) => {
     const { destination, source, draggableId } = result;
-
+ 
     if (!destination) return;
     if (
       destination.droppableId === source.droppableId &&

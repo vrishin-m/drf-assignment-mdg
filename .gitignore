@@ -31,3 +31,4 @@ pnpm-debug.log*
 .env.production.local
 *.env
 frontend_testing/
+frontend_testing2/
