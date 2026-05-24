@@ -142,7 +142,7 @@ export default function CreateTask() {
 
 const styles = {
   page: { padding: '100px 20px', fontFamily: 'sans-serif', maxWidth: '800px', margin: '0 auto' },
-  header: { marginBottom: '20px', color: '#1a202c' },
+  header: { marginBottom: '20px', color: '#d7d8db' },
   container: { display: 'flex', flexDirection: 'column', gap: '30px' },
   form: { backgroundColor: '#fff', padding: '24px', borderRadius: '8px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' },
   row: { display: 'flex', gap: '16px', flexWrap: 'wrap' },

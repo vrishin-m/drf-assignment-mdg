@@ -8,7 +8,6 @@ class Studio(models.Model):
     name = models.CharField(max_length=255)
     slug = models.SlugField(unique=True)         
     description = models.TextField(blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
     is_active = models.BooleanField(default=True)
 
     def __str__(self):

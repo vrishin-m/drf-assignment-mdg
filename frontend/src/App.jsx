@@ -5,6 +5,7 @@ import HomeView from './pages/home.jsx';
 import CreateTaskView from './pages/createtask.jsx';
 import OrganizeView from './pages/board.jsx';
 import MembersView from './pages/members.jsx';
+import StudiosView from './pages/studios.jsx';
 
 function Navbar() {
   return (
@@ -15,6 +16,7 @@ function Navbar() {
         <Link to="/create-task" style={linkStyle}> Create Task</Link>
         <Link to="/organize" style={linkStyle}> Organize Tasks</Link>
         <Link to="/members" style={linkStyle}> Manage Members</Link>
+        <Link to="/studios" style={linkStyle}> Studios</Link>
       </div>
     </nav>
   );
@@ -30,6 +32,7 @@ export default function App() {
         <Route path="/create-task" element={<CreateTaskView />} />
         <Route path="/organize" element={<OrganizeView />} />
         <Route path="/members" element={<MembersView />} />
+        <Route path="/studios" element={<StudiosView />} />
       </Routes>
     </BrowserRouter>
   );

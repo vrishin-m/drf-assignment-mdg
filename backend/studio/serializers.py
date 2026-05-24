@@ -8,8 +8,8 @@ class StudioSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Studio
-        fields = ['id', 'name', 'slug', 'description', 'member_count', 'created_at']
-        read_only_fields = ['id', 'created_at']
+        fields = ['id', 'name', 'slug', 'description', 'member_count']
+        read_only_fields = ['id']
 
     def get_member_count(self, obj):
         return obj.memberships.count()
