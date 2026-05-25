@@ -40,16 +40,19 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     "rest_framework",
-    "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
     "accounts",
     "studios",
     "projects",
+    "corsheaders",
+    "comments",
+    "notifications"
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -58,13 +61,13 @@ MIDDLEWARE = [
 ]
 
 
-try:
-    if importlib.util.find_spec("corsheaders") is not None:
-        INSTALLED_APPS.append("corsheaders")
+# try:
+#     if importlib.util.find_spec("corsheaders") is not None:
+#         INSTALLED_APPS.append("corsheaders")
 
-        MIDDLEWARE.insert(1, 'corsheaders.middleware.CorsMiddleware')
-except Exception:
-    pass
+#         MIDDLEWARE.insert(1, 'corsheaders.middleware.CorsMiddleware')
+# except Exception:
+#     pass
 
 try:
     if importlib.util.find_spec("django_extensions") is not None:

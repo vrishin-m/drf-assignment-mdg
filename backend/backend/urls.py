@@ -30,4 +30,12 @@ urlpatterns = [
         "api/",
         include("projects.urls")
     ),
+    path(
+        "api/",
+        include("comments.urls")
+    ),
+    path(
+        "api/",
+        include("notifications.urls")
+    )
 ]
