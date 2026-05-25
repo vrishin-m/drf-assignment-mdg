@@ -7,16 +7,29 @@ import OrganizeView from './pages/board.jsx';
 import MembersView from './pages/members.jsx';
 import StudiosView from './pages/studios.jsx';
 
+
+
+
+
+
+
+
+
+
+
+         
+
 function Navbar() {
   return (
     <nav style={navStyle}>
       <div style={{ color: '#fff', fontWeight: 'bold' }}> Studio App</div>
       <div style={{ display: 'flex', gap: '20px' }}>
         <Link to="/" style={linkStyle}>Home / Login</Link>
-        <Link to="/create-task" style={linkStyle}> Create Task</Link>
-        <Link to="/organize" style={linkStyle}> Organize Tasks</Link>
-        <Link to="/members" style={linkStyle}> Manage Members</Link>
         <Link to="/studios" style={linkStyle}> Studios</Link>
+        <Link to="/studios" style={linkStyle}> Create Task</Link>
+        <Link to="/studios" style={linkStyle}> Organize Tasks</Link>
+        <Link to="/studios" style={linkStyle}> Manage Members</Link>
+        
       </div>
     </nav>
   );
@@ -29,10 +42,12 @@ export default function App() {
       <Routes>
 
         <Route path="/" element={<HomeView />} />
-        <Route path="/create-task" element={<CreateTaskView />} />
-        <Route path="/organize" element={<OrganizeView />} />
-        <Route path="/members" element={<MembersView />} />
+        <Route path="/studios/:studioSlug/projects/:projectId/create-task"  element={<CreateTaskView />} />
+        <Route path="/studios/:studioSlug/projects/:projectId/organize" element={<OrganizeView />} />
+        <Route path="/studios/:studioSlug/projects/:projectId/members"  element={<MembersView />} />
         <Route path="/studios" element={<StudiosView />} />
+         
+
       </Routes>
     </BrowserRouter>
   );

@@ -1,30 +1,58 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import api from '../api';
 
 export default function CreateTask() {
+  const { studioSlug, projectId } = useParams();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState('Medium');
   const [deadline, setDeadline] = useState('');
   const [tasks, setTasks] = useState([]);
+  const [message, setMessage] = useState('');
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    const fetchTasks = async () => {
+      if (!studioSlug || !projectId) return;
+      try {
+        const resp = await api.get(`/studios/${studioSlug}/projects/${projectId}/tasks/`);
+        setTasks(resp.data);
+      } catch (err) {
+        console.error('Error fetching tasks:', err);
+      }
+    };
+    fetchTasks();
+  }, [studioSlug, projectId]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!title.trim()) return;
-    const newTask = {
-      id: Date.now(),
+
+    const payload = {
       title,
       description,
-      priority,
-      deadline,
+      priority: priority.toLowerCase(),
     };
+    if (deadline) payload.deadline = deadline;
 
-    setTasks([newTask, ...tasks]);
-    setTitle('');
-    setDescription('');
-    setPriority('Medium');
-    setDeadline('');
-    
-    //MAKE API CALL HERE
+    try {
+      if (studioSlug && projectId) {
+        const resp = await api.post(`/studios/${studioSlug}/projects/${projectId}/tasks/`, payload);
+        setTasks([resp.data, ...tasks]);
+      } else {
+        // fallback local task when params not present
+        const newTask = { id: Date.now(), title, description, priority, deadline };
+        setTasks([newTask, ...tasks]);
+      }
+      setTitle('');
+      setDescription('');
+      setPriority('Medium');
+      setDeadline('');
+      setMessage('Task created.');
+    } catch (err) {
+      console.error('Failed to create task:', err);
+      setMessage('Failed to create task.');
+    }
   };
 
   const getPriorityColor = (level) => {

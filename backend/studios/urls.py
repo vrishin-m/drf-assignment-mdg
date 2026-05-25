@@ -5,4 +5,3 @@ router = DefaultRouter()
 router.register(r'studios', StudioViewSet, basename='studio')
 
 urlpatterns = router.urls
-

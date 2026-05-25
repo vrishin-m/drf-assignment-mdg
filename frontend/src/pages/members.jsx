@@ -1,102 +1,154 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import api from '../api';
+
+const ROLE_OPTIONS = [
+  { label: 'Studio Admin', value: 'studio_admin' },
+  { label: 'Project Lead', value: 'project_lead' },
+  { label: 'Designer', value: 'designer' },
+  { label: 'Writer', value: 'writer' },
+  { label: 'Reviewer', value: 'reviewer' },
+  { label: 'Client Viewer', value: 'client_viewer' },
+];
 
 export default function MembersView() {
-  const [members, setMembers] = useState([
-    { id: 101, username: 'hrhrhrh', email: 'seegegege@studio.com', role: 'Producer' },
-    { id: 102, username: 'arhrhx', email: 'jtjtx@studio.com', role: 'Designer' },
-    
-  ]);
+  const { studioSlug, projectId } = useParams();
+  const [members, setMembers] = useState([]);
+  const [tasks, setTasks] = useState([]);
+  const [loadingMembers, setLoadingMembers] = useState(true);
+  const [loadingTasks, setLoadingTasks] = useState(true);
+  const [error, setError] = useState('');
 
+  useEffect(() => {
+    const fetchMembers = async () => {
+      if (!studioSlug) return;
+      try {
+        const resp = await api.get(`/studios/${studioSlug}/members/`);
+        setMembers(resp.data);
+      } catch (err) {
+        console.error('Error fetching members:', err);
+        setError('Failed to load members.');
+      } finally {
+        setLoadingMembers(false);
+      }
+    };
 
-  const [tasks, setTasks] = useState([
-    { id: 1, title: 'eat a potato', assigned_to: null },
-    { id: 2, title: 'plant a potato', assigned_to: 102 },
-    { id: 3, title: 'cook a potato', assigned_to: 101 },
-  ]);
+    const fetchTasks = async () => {
+      if (!studioSlug || !projectId) return;
+      try {
+        const resp = await api.get(`/studios/${studioSlug}/projects/${projectId}/tasks/`);
+        setTasks(resp.data);
+      } catch (err) {
+        console.error('Error fetching tasks:', err);
+        setError('Failed to load tasks.');
+      } finally {
+        setLoadingTasks(false);
+      }
+    };
 
-  const availableRoles = ['Admin', 'Producer', 'Designer', 'Editor'];
+    fetchMembers();
+    fetchTasks();
+  }, [studioSlug, projectId]);
 
-  const handleRoleChange = (memberId, newRole) => {
-   
-    // api call goes here
-    setMembers(members.map(m => m.id === memberId ? { ...m, role: newRole } : m));
+  const handleRoleChange = async (userId, newRole) => {
+    try {
+      const resp = await api.patch(`/studios/${studioSlug}/members/${userId}/`, { role: newRole });
+      setMembers(members.map(m => (m.user && String(m.user.id) === String(resp.data.user?.id) ? resp.data : m)));
+    } catch (err) {
+      console.error('Failed to update role:', err);
+      setError('Failed to update role.');
+    }
   };
 
-
-  const handleAssignTask = (taskId, memberId) => {
-    const targetMemberId = memberId ? parseInt(memberId) : null;
-
-    // api call here
-    setTasks(tasks.map(t => t.id === taskId ? { ...t, assigned_to: targetMemberId } : t));
+  const handleAssignTask = async (taskId, memberUserId) => {
+    const assignee = memberUserId ? memberUserId : null;
+    try {
+      const resp = await api.patch(`/studios/${studioSlug}/projects/${projectId}/tasks/${taskId}/`, { assignee });
+      setTasks(tasks.map(t => (String(t.id) === String(taskId) ? resp.data : t)));
+    } catch (err) {
+      console.error('Failed to assign task:', err);
+      setError('Failed to assign task.');
+    }
   };
+
+  const displayName = (member) => member?.user?.full_name || member?.user_name || member?.user?.email || 'Unknown';
 
   return (
     <div style={styles.page}>
       <h2 style={styles.mainTitle}>Manage Studio Members</h2>
 
+      {error && <div style={{ color: 'red', marginBottom: 12 }}>{error}</div>}
+
       <div style={styles.splitLayout}>
 
         <div style={styles.panelCard}>
-          <h3 style={styles.sectionTitle}>Team  & Roles</h3>
-          <div style={styles.rosterList}>
-            {members.map(member => (
-              <div key={member.id} style={styles.memberCard}>
-                <div>
-                  <strong style={styles.username}>@{member.username}</strong>
-                  <div style={styles.email}>{member.email}</div>
-                </div>
-                <div>
-                  <select
-                    value={member.role}
-                    onChange={(e) => handleRoleChange(member.id, e.target.value)}
-                    style={styles.roleSelect}
-                  >
-                    {availableRoles.map(role => (
-                      <option key={role} value={role}>{role}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-
-        <div style={styles.panelCard}>
-          <h3 style={styles.sectionTitle}> Task Assignments</h3>
-          <div style={styles.taskList}>
-            {tasks.map(task => (
-              <div key={task.id} style={styles.taskCard}>
-                <div style={styles.taskTextInfo}>
-                  <span style={styles.taskTitle}>{task.title}</span>
-                  <div style={styles.assignmentStatus}>
-                    Status:{' '}
-                    {task.assigned_to ? (
-                      <span style={{ color: '#2b6cb0', fontWeight: 'bold' }}>
-                        Assigned to @{members.find(m => m.id === task.assigned_to)?.username}
-                      </span>
-                    ) : (
-                      <span style={{ color: '#c53030', fontWeight: 'bold' }}>Unassigned</span>
-                    )}
+          <h3 style={styles.sectionTitle}>Team & Roles</h3>
+          {loadingMembers ? (
+            <p style={{ color: '#a0aec0' }}>Loading members...</p>
+          ) : (
+            <div style={styles.rosterList}>
+              {members.map((member) => (
+                <div key={member.user?.id || member.id} style={styles.memberCard}>
+                  <div>
+                    <strong style={styles.username}>@{displayName(member)}</strong>
+                    <div style={styles.email}>{member.user?.email || member.user_email}</div>
+                  </div>
+                  <div>
+                    <select
+                      value={member.role || ''}
+                      onChange={(e) => handleRoleChange(member.user?.id, e.target.value)}
+                      style={styles.roleSelect}
+                    >
+                      {ROLE_OPTIONS.map((r) => (
+                        <option key={r.value} value={r.value}>{r.label}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
-                <div>
-                  <select
-                    value={task.assigned_to || ''}
-                    onChange={(e) => handleAssignTask(task.id, e.target.value)}
-                    style={styles.assignSelect}
-                  >
-                    <option value="">-- Assign Owner --</option>
-                    {members.map(m => (
-                      <option key={m.id} value={m.id}>
-                        @{m.username} ({m.role})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div style={styles.panelCard}>
+          <h3 style={styles.sectionTitle}>Task Assignments</h3>
+          {loadingTasks ? (
+            <p style={{ color: '#a0aec0' }}>Loading tasks...</p>
+          ) : (
+            <div style={styles.taskList}>
+              {tasks.map((task) => {
+                const assigned = String(task.assignee || '');
+                const assignedMember = members.find((m) => String(m.user?.id) === assigned);
+                return (
+                  <div key={task.id} style={styles.taskCard}>
+                    <div style={styles.taskTextInfo}>
+                      <span style={styles.taskTitle}>{task.title}</span>
+                      <div style={styles.assignmentStatus}>
+                        Status:{' '}
+                        {assignedMember ? (
+                          <span style={{ color: '#2b6cb0', fontWeight: 'bold' }}>Assigned to @{displayName(assignedMember)}</span>
+                        ) : (
+                          <span style={{ color: '#c53030', fontWeight: 'bold' }}>Unassigned</span>
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      <select
+                        value={task.assignee || ''}
+                        onChange={(e) => handleAssignTask(task.id, e.target.value)}
+                        style={styles.assignSelect}
+                      >
+                        <option value="">-- Assign Owner --</option>
+                        {members.map((m) => (
+                          <option key={m.user?.id || m.id} value={m.user?.id}>{displayName(m)} ({m.role_display || m.role})</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     </div>
