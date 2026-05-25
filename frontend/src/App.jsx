@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
-
+import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
 import HomeView from './pages/home.jsx';
 import CreateTaskView from './pages/createtask.jsx';
@@ -10,26 +11,47 @@ import StudiosView from './pages/studios.jsx';
 
 
 
-
-
-
-
-
-
-
          
-
 function Navbar() {
+  const [activeStudio, setActiveStudio] = useState('');
+  const [projectId, setProjectId] = useState('');
+  const location = useLocation();
+  
+  useEffect(() => {
+    const storedSlug = localStorage.getItem('current_studio_slug');
+    const storedProjectId = localStorage.getItem('current_project_id');
+    if (storedSlug && storedSlug !== 'null' && storedSlug !== 'undefined') {
+      setActiveStudio(storedSlug);
+    } else {
+      setActiveStudio('');
+    }
+    if (storedProjectId && storedProjectId !== 'null' && storedProjectId !== 'undefined') {
+      setProjectId(storedProjectId);
+    } else {
+      setProjectId('00000000-0000-0000-0000-000000000000');
+    }
+  
+
+  }, [location]);
+
   return (
     <nav style={navStyle}>
       <div style={{ color: '#fff', fontWeight: 'bold' }}> Studio App</div>
-      <div style={{ display: 'flex', gap: '20px' }}>
+      <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
         <Link to="/" style={linkStyle}>Home / Login</Link>
-        <Link to="/studios" style={linkStyle}> Studios</Link>
-        <Link to="/studios" style={linkStyle}> Create Task</Link>
-        <Link to="/studios" style={linkStyle}> Organize Tasks</Link>
-        <Link to="/studios" style={linkStyle}> Manage Members</Link>
-        
+        <Link to="/studios" style={linkStyle}>Studios</Link>
+
+        {activeStudio ? (
+          <>
+            <Link to={`/studios/${activeStudio}/projects/${projectId}/create-task/`} style={linkStyle}>Create Task</Link>
+            <Link to={`/studios/${activeStudio}/projects/${projectId}/organize/`} style={linkStyle}>Organize Tasks</Link>
+            <Link to={`/studios/${activeStudio}/projects/${projectId}/members/`} style={linkStyle}>Manage Members</Link>
+            
+            <span >Current Studio: {activeStudio}</span>
+          </>   
+        ) : (
+          <span >Go to "Studios" and select or create one</span>
+        )}
       </div>
     </nav>
   );
